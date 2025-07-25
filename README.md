@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Name Generator 9000</title>
+  <style>
+    body {
+      font-family: monospace;
+      background-color: #111;
+      color: #0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    #name {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+      border: 2px solid #0f0;
+      padding: 1rem;
+      width: fit-content;
+      aria-live: polite;
+    }
+    button {
+      margin: 0.5rem;
+      padding: 0.6rem 1rem;
+      background-color: #222;
+      color: #0f0;
+      border: 1px solid #0f0;
+      cursor: pointer;
+    }
+    button.active {
+      background-color: #0f0;
+      color: #000;
+    }
+    input[type="range"] {
+      width: 200px;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div id="name" aria-live="polite">Generiere Namen...</div>
+  <div>
+    <button id="generate">Name generieren</button>
+    <button id="mutate">Mutieren</button>
+    <button id="burst">Impro-Burst</button>
+  </div>
+  <div>
+    <label for="power">Power-Level: <span id="powerLabel">Cool</span></label><br />
+    <input type="range" id="power" min="1" max="5" value="1" />
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const baseWords1 = [
+        "OMEGA_BLIVION", "CRYPT0", "HELL", "VOID", "RAGNAROK", "BINARY",
+        "XEN0", "PRIMORDIAL", "QUANTUM", "D3MON", "EXODUS", "CHAOS"
+      ];
+      const baseWords2 = [
+        "ENGINE", "DR1VER", "ARCHITECT", "PROTOCOL", "LORD", "DEV0URER",
+        "SYSTEM", "PR1MUS", "SAVANT", "SEQUENCER", "REVENANT", "EXECUTOR"
+      ];
+      const baseWords3 = [
+        "666", "EXE", "PRIME", "OMEGA", "X", "0", "ULTIMATUM", "INFINITY"
+      ];
+      const powerLevels = ["Cool", "Krass", "Endboss", "Apokalypse", "∞ Ragnarök"];
+
+      const randomPick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+      const mutateWord = (word) => {
+        const leet = { A: "4", E: "3", I: "1", O: "0", S: "5", T: "7" };
+        return [...word]
+          .map((c) => leet[c.toUpperCase()] ?? c)
+          .join("");
+      };
+
+      let power = 1;
+      let burstActive = false;
+      let burstInterval = null;
+
+      const nameDiv = document.getElementById("name");
+      const generateBtn = document.getElementById("generate");
+      const mutateBtn = document.getElementById("mutate");
+      const burstBtn = document.getElementById("burst");
+      const powerSlider = document.getElementById("power");
+      const powerLabel = document.getElementById("powerLabel");
+
+      function generateName(power) {
+        let w1 = randomPick(baseWords1);
+        let w2 = randomPick(baseWords2);
+        let w3 = randomPick(baseWords3);
+        if (power > 2) {
+          w1 = mutateWord(w1);
+          w2 = mutateWord(w2);
+        }
+        if (power > 3) {
+          return `${w1}.${w2}.${w3}.${randomPick(baseWords1)}_${randomPick(baseWords3)}`;
+        }
+        return `${w1}.${w2}.${w3}`;
+      }
+
+      function updateName() {
+        const newName = generateName(power);
+        nameDiv.textContent = newName;
+      }
+
+      function mutateName() {
+        const current = nameDiv.textContent;
+        nameDiv.textContent = mutateWord(current);
+      }
+
+      generateBtn.addEventListener("click", updateName);
+      mutateBtn.addEventListener("click", mutateName);
+
+      burstBtn.addEventListener("click", () => {
+        burstActive = !burstActive;
+        if (burstActive) {
+          burstBtn.classList.add("active");
+          burstBtn.textContent = "Stop Impro-Burst";
+          burstInterval = setInterval(updateName, 300);
+        } else {
+          burstBtn.classList.remove("active");
+          burstBtn.textContent = "Impro-Burst";
+          clearInterval(burstInterval);
+        }
+      });
+
+      powerSlider.addEventListener("input", () => {
+        power = Number(powerSlider.value);
+        powerLabel.textContent = powerLevels[power - 1];
+        updateName();
+      });
+
+      updateName();
+    });
+  </script>
+</body>
+</html>
+
